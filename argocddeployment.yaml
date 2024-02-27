@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/cprafi/mtechproject.git
+    repoURL: https://github.com/cprafi/K8.git
     targetRevision: HEAD
     path: dev
   destination: 
