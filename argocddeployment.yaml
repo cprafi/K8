@@ -9,10 +9,10 @@ spec:
   source:
     repoURL: https://github.com/cprafi/K8.git
     targetRevision: HEAD
-    path: dev
+    #path: dev
   destination: 
     server: https://kubernetes.default.svc
-    namespace: datacollection
+    namespace: mydatacollection
 
   syncPolicy:
     syncOptions:
