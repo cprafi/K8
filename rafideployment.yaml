@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datacollection-deploy
+  labels:
+    name: datacollection-deploy
+    app: remotedata
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: datacollection-pod
+      app: remotedata
+  template:
+    metadata:
+      name: datacollection-pod
+      labels:
+        name: datacollection-pod
+        app: remotedata
+    spec:
+      containers:
+      - name: datacollection
+        image: raficp/datacollection:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datacollection-service
+  labels:
+    name: datacollection-service
+    app: remotedata
+spec:
+  selector:
+    name: datacollection-pod
+    app: remotedata
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  #type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dataview-deploy
+  labels:
+    name: dataview-deploy
+    app: remotedata
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: dataview-pod
+      app: remotedata
+  template:
+    metadata:
+      name: dataview-pod
+      labels:
+        name: dataview-pod
+        app: remotedata
+    spec:
+      containers:
+      - name: dataview
+        image: raficp/dataview:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dataview-service
+  labels:
+    name: dataview-service
+    app: remotedata
+spec:
+  selector:
+    name: dataview-pod
+    app: remotedata
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  #type: LoadBalancer
+---
