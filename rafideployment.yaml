@@ -10,19 +10,19 @@ metadata:
   name: datacollection-deploy
   labels:
     name: datacollection-deploy
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
 spec:
   replicas: 3
   selector:
     matchLabels:
       name: datacollection-pod
-      app: remotedata-app
+      app.kubernetes.io/name: remotedata-app
   template:
     metadata:
       name: datacollection-pod
       labels:
         name: datacollection-pod
-        app: remotedata-app
+        app.kubernetes.io/name: remotedata-app
     spec:
       containers:
       - name: datacollection
@@ -37,11 +37,11 @@ metadata:
   name: datacollection-service
   labels:
     name: datacollection-service
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
 spec:
   selector:
     name: datacollection-pod
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
   ports:
     - protocol: TCP
       port: 8080
@@ -55,19 +55,19 @@ metadata:
   name: dataview-deploy
   labels:
     name: dataview-deploy
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
 spec:
   replicas: 2
   selector:
     matchLabels:
       name: dataview-pod
-      app: remotedata-app
+      app.kubernetes.io/name: remotedata-app
   template:
     metadata:
       name: dataview-pod
       labels:
         name: dataview-pod
-        app: remotedata-app
+        app.kubernetes.io/name: remotedata-app
     spec:
       containers:
       - name: dataview
@@ -82,11 +82,11 @@ metadata:
   name: dataview-service
   labels:
     name: dataview-service
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
 spec:
   selector:
     name: dataview-pod
-    app: remotedata-app
+    app.kubernetes.io/name: remotedata-app
   ports:
     - protocol: TCP
       port: 8080
