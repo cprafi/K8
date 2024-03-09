@@ -1,22 +1,28 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: remotemonitoring
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: remotemonitoring
   name: datacollection-deploy
   labels:
     name: datacollection-deploy
-    app: remotedata
+    app: remotedata-app
 spec:
   replicas: 2
   selector:
     matchLabels:
       name: datacollection-pod
-      app: remotedata
+      app: remotedata-app
   template:
     metadata:
       name: datacollection-pod
       labels:
         name: datacollection-pod
-        app: remotedata
+        app: remotedata-app
     spec:
       containers:
       - name: datacollection
@@ -27,14 +33,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: remotemonitoring
   name: datacollection-service
   labels:
     name: datacollection-service
-    app: remotedata
+    app: remotedata-app
 spec:
   selector:
     name: datacollection-pod
-    app: remotedata
+    app: remotedata-app
   ports:
     - protocol: TCP
       port: 8080
@@ -44,22 +51,23 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: remotemonitoring
   name: dataview-deploy
   labels:
     name: dataview-deploy
-    app: remotedata
+    app: remotedata-app
 spec:
   replicas: 2
   selector:
     matchLabels:
       name: dataview-pod
-      app: remotedata
+      app: remotedata-app
   template:
     metadata:
       name: dataview-pod
       labels:
         name: dataview-pod
-        app: remotedata
+        app: remotedata-app
     spec:
       containers:
       - name: dataview
@@ -70,17 +78,35 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: remotemonitoring
   name: dataview-service
   labels:
     name: dataview-service
-    app: remotedata
+    app: remotedata-app
 spec:
   selector:
     name: dataview-pod
-    app: remotedata
+    app: remotedata-app
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
   #type: LoadBalancer
 ---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: remotemonitoring
+  name: ingress-remotemonitoring
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: dataview-service
+              servicePort: 80
