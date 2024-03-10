@@ -93,21 +93,20 @@ spec:
       targetPort: 8080
   
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   namespace: remotemonitoring
-  name: product-ingress
-
+  name: ingress-remote
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
 spec:
-  ingressClassName: alb
   rules:
     - http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /*
             backend:
-              service:
-                name: dataview-service
-                port:
-                  number: 8080
+              serviceName: dataview-service
+              servicePort: 80
