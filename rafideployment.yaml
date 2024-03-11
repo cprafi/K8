@@ -106,9 +106,10 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - http:
+    - host: 3233.example.com
+      http:
         paths:
-          - path: /
+          - path: /*
             pathType: Prefix
             backend:
               service:
