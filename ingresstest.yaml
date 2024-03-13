@@ -1,116 +1,53 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: remotemonitoring
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: remotemonitoring
-  name: datacollection-deploy
+  name: echo-server-v1
   labels:
-    name: datacollection-deploy
-    app.kubernetes.io/name: remotedata-app
+    version: v1
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      name: datacollection-pod
-      app.kubernetes.io/name: remotedata-app
-  template:
-    metadata:
-      name: datacollection-pod
-      labels:
-        name: datacollection-pod
-        app.kubernetes.io/name: remotedata-app
-    spec:
-      containers:
-      - name: datacollection
-        image: raficp/datacollection:latest
-        ports:
-        - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: remotemonitoring
-  name: datacollection-service
-  labels:
-    name: datacollection-service
-    app.kubernetes.io/name: remotedata-app
-spec:
-  selector:
-    name: datacollection-pod
-    app.kubernetes.io/name: remotedata-app
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
-  
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: remotemonitoring
-  name: dataview-deploy
-  labels:
-    name: dataview-deploy
-    app.kubernetes.io/name: remotedata-app
-spec:
+      app: echo-server
+      version: v1
   replicas: 2
-  selector:
-    matchLabels:
-      name: dataview-pod
-      app.kubernetes.io/name: remotedata-app
   template:
     metadata:
-      name: dataview-pod
       labels:
-        name: dataview-pod
-        app.kubernetes.io/name: remotedata-app
+        app: echo-server
+        version: v1
     spec:
       containers:
-      - name: dataview
-        image: raficp/dataview:latest
-        ports:
-        - containerPort: 8080
+      - name: echo-server
+        image: k8s.gcr.io/echoserver:1.4
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: remotemonitoring
-  name: dataview-service
+  name: echo-server-v1
   labels:
-    name: dataview-service
-    app.kubernetes.io/name: remotedata-app
+    version: v1
 spec:
-  selector:
-    name: dataview-pod
-    app.kubernetes.io/name: remotedata-app
+  type: ClusterIP
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
-  type: NodePort
-  
+  - name: echo-port
+    port: 80
+    targetPort: 8080
+  selector:
+    app: echo-server
+    version: v1
 ---
-apiVersion: networking.k8s.io/v1
+apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  namespace: remotemonitoring
-  name: product-ingress
+  name: echo-v1-ingress
   annotations:
-    
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: nginx
   rules:
-    - host: product.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: dataview-service
-                port:
-                  number: 8080
+  - http:
+      paths:
+      - path: /echo-v1
+        backend:
+          serviceName: echo-server-v1
+          servicePort: 80
