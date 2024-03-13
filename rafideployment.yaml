@@ -1,118 +1,62 @@
+---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: remotemonitoring
+  name: game-2048
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: remotemonitoring
-  name: datacollection-deploy
-  labels:
-    name: datacollection-deploy
-    app.kubernetes.io/name: remotedata-app
+  namespace: game-2048
+  name: deployment-2048
 spec:
-  replicas: 3
   selector:
     matchLabels:
-      name: datacollection-pod
-      app.kubernetes.io/name: remotedata-app
+      app.kubernetes.io/name: app-2048
+  replicas: 5
   template:
     metadata:
-      name: datacollection-pod
       labels:
-        name: datacollection-pod
-        app.kubernetes.io/name: remotedata-app
+        app.kubernetes.io/name: app-2048
     spec:
       containers:
-      - name: datacollection
-        image: raficp/datacollection:latest
+      - image: public.ecr.aws/l6m2t8p7/docker-2048:latest
+        imagePullPolicy: Always
+        name: app-2048
         ports:
-        - containerPort: 8080
+        - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: remotemonitoring
-  name: datacollection-service
-  labels:
-    name: datacollection-service
-    app.kubernetes.io/name: remotedata-app
+  namespace: game-2048
+  name: service-2048
 spec:
-  selector:
-    name: datacollection-pod
-    app.kubernetes.io/name: remotedata-app
   ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
-  
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  namespace: remotemonitoring
-  name: dataview-deploy
-  labels:
-    name: dataview-deploy
-    app.kubernetes.io/name: remotedata-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      name: dataview-pod
-      app.kubernetes.io/name: remotedata-app
-  template:
-    metadata:
-      name: dataview-pod
-      labels:
-        name: dataview-pod
-        app.kubernetes.io/name: remotedata-app
-    spec:
-      containers:
-      - name: dataview
-        image: raficp/dataview:latest
-        ports:
-        - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  namespace: remotemonitoring
-  name: dataview-service
-  labels:
-    name: dataview-service
-    app.kubernetes.io/name: remotedata-app
-spec:
-  selector:
-    name: dataview-pod
-    app.kubernetes.io/name: remotedata-app
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
+    - port: 80
+      targetPort: 80
+      protocol: TCP
   type: NodePort
-  
+  selector:
+    app.kubernetes.io/name: app-2048
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: remotemonitoring
-  name: product-ingress
+  namespace: game-2048
+  name: ingress-2048
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/subnets: subnet-a, subnet-b, subnet-c
 spec:
   ingressClassName: alb
   rules:
-    - host: 
-      http:
+    - http:
         paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: dataview-service
-                port:
-                  number: 8080
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: service-2048
+              port:
+                number: 80
