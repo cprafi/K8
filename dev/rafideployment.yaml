@@ -7,6 +7,51 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: remotemonitoring
+  name: datacollection-deploy
+  labels:
+    name: datacollection-deploy
+    app.kubernetes.io/name: remotedata-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      name: datacollection-pod
+      app.kubernetes.io/name: remotedata-app
+  template:
+    metadata:
+      name: datacollection-pod
+      labels:
+        name: datacollection-pod
+        app.kubernetes.io/name: remotedata-app
+    spec:
+      containers:
+      - name: datacollection
+        image: raficp/datacollection:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: remotemonitoring
+  name: datacollection-service
+  labels:
+    name: datacollection-service
+    app.kubernetes.io/name: remotedata-app
+spec:
+  selector:
+    name: datacollection-pod
+    app.kubernetes.io/name: remotedata-app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: remotemonitoring
   name: dataview-deploy
   labels:
     name: dataview-deploy
@@ -28,7 +73,7 @@ spec:
       - name: dataview
         image: raficp/dataview:latest
         ports:
-        - containerPort: 80
+        - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -44,8 +89,8 @@ spec:
     app.kubernetes.io/name: remotedata-app
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 8080
+      targetPort: 8080
   type: NodePort
   
 ---
@@ -60,12 +105,14 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - http:
+    - host:
+    - host: 
+      http:
         paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: dataview-service
-              port:
-                number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dataview-service
+                port:
+                  number: 8080
