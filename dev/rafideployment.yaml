@@ -12,7 +12,7 @@ metadata:
     name: datacollection-deploy
     app.kubernetes.io/name: remotedata-app
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       name: datacollection-pod
