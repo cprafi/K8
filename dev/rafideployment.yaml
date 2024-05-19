@@ -57,7 +57,7 @@ metadata:
     name: dataview-deploy
     app.kubernetes.io/name: remotedata-app
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       name: dataview-pod
