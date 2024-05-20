@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
       - name: dataview
-        image: raficp/dataview:1
+        image: raficp/dataview:latest
         ports:
         - containerPort: 8080
 ---
